@@ -1,0 +1,73 @@
+#Instructions:
+
+
+
+
+import streamlit as st
+import yfinance as yf
+import pandas as pd
+
+# Page setup
+st.set_page_config(page_title="Financial Analyzer", layout="wide")
+st.title("Financial Statement Analyzer")
+
+
+ticker = st.text_input("Stock ticker (e.g., AAPL, TSLA):", value="AAPL").strip().upper()
+
+
+def load_data(symbol):
+    stock = yf.Ticker(symbol)
+
+    income_stmt = stock.financials.transpose()
+    balance_sheet = stock.balance_sheet.transpose()
+    cash_flow = stock.cashflow.transpose()
+
+
+    ratios = {}
+
+
+    if not income_stmt.empty and not balance_sheet.empty:
+        latest_income = income_stmt.iloc[0]
+        latest_balance = balance_sheet.iloc[0]
+
+        revenue = latest_income.get("Total Revenue")
+        net_income = latest_income.get("Net Income")
+        total_assets = latest_balance.get("Total Assets")
+        equity = latest_balance.get("Total Stockholder Equity")
+
+        if pd.notna(net_income) and pd.notna(revenue) and revenue != 0:
+            ratios["Profit Margin"] = net_income / revenue
+        if pd.notna(net_income) and pd.notna(total_assets) and total_assets != 0:
+            ratios["Return on Assets"] = net_income / total_assets
+        if pd.notna(net_income) and pd.notna(equity) and equity != 0:
+            ratios["Return on Equity"] = net_income / equity
+
+    return income_stmt, balance_sheet, cash_flow, ratios
+
+if ticker:
+    inc, bal, cash, key_ratios = load_data(ticker)
+
+    st.subheader("Income Statement")
+    if not inc.empty:
+        st.dataframe(inc)
+    else:
+        st.warning("Income statement data not available.")
+
+    st.subheader("Balance Sheet")
+    if not bal.empty:
+        st.dataframe(bal)
+    else:
+        st.warning("Balance sheet data not available.")
+
+    st.subheader("Cash Flow Statement")
+    if not cash.empty:
+        st.dataframe(cash)
+    else:
+        st.warning("Cash flow statement data not available.")
+
+    st.subheader("Key Financial Ratios")
+    if key_ratios:
+        for label, val in key_ratios.items():
+            st.markdown(f"- **{label}**: {val:.2%}")
+    else:
+        st.info("Financial ratios could not be calculated — data may be missing or incomplete.")
