@@ -1,7 +1,14 @@
+#Description:
+#Uses yfinance to retrieve financial statements of company user inputs in the dashboard. Calculates simple financial metrics.
+
 #Instructions:
-
-
-
+#(1) Ensure relevant libraries downloaded (pandas, yfinance etc.)
+#(2) Open Python, paste code below.
+#(3) Save file as 'financial_analyser.py' in selected folder.
+#(4) Open notepad. Paste this into notepad, altering the file location to fit you file location:
+#       streamlit run "C:\Users\User\Documents\FinancialAnalyzer\financial_dashboard.py"
+#(5) Save this file as 'financial_dashoard.bat'.
+#(6) Open the .bat file, and the dashboard will open.
 
 import streamlit as st
 import yfinance as yf
