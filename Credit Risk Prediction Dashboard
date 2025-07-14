@@ -1,7 +1,12 @@
 #Instructions:
+#Ensure necessary libraries are installed.
 #Download 'cleaned_loans_dataset.csv' from Library.
-#Copy paste the relevant
-#
+#Copy paste code below into Python IDLE.
+#Input the right file DIRECTORY where it says DIRECTORY.
+#Save file as .py file.
+#Open CMD, and go into necessary directoy: "cd C:(DIRECTORY).
+#Type "streamlit run credit_risk_dashboard.py", where credit__risk_dashboard is the name of your .py file.
+
 
 
 
@@ -18,7 +23,7 @@ st.set_page_config(page_title="Credit Risk Dashboard", layout="centered")
 st.title("K-Means Clustering Credit Risk Dashboard")
 
 #Load Data
-df = pd.read_csv(r'C:\Users\lappa\OneDrive\Documents\FinancialAnalyzer\cleaned_loans_dataset.csv')
+df = pd.read_csv(r'C:\(DIRECTORY)\cleaned_loans_dataset.csv')
 
 #Scale Data 
 scaler = StandardScaler()
