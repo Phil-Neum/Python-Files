@@ -1,0 +1,74 @@
+#Instructions:
+#Copy paste the relevant
+
+
+
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.ensemble import RandomForestClassifier
+
+st.set_page_config(page_title="Credit Risk Dashboard", layout="centered")
+
+st.title("K-Means Clustering Credit Risk Dashboard")
+
+#Load Data
+df = pd.read_csv(r'C:\Users\lappa\OneDrive\Documents\FinancialAnalyzer\cleaned_loans_dataset.csv')
+
+#Scale Data 
+scaler = StandardScaler()
+df[['dti_scaled', 'annual_inc_scaled', 'revol_util_scaled', 'delinq_2yrs_scaled', 'loan_amnt_scaled']] = scaler.fit_transform(df[['dti', 'annual_inc', 'revol_util', 'delinq_2yrs', 'loan_amnt']])
+
+#K-Means Clustering Process
+kmeans = KMeans(n_clusters=5, random_state=50)
+features = ['dti', 'annual_inc', 'revol_util', 'delinq_2yrs', 'loan_amnt']
+scaled_features = [f + "_scaled" for f in features]
+df['cluster'] = kmeans.fit_predict(df[scaled_features])
+
+
+# Risk mapping on clusters. Note: Since there were 5 clusters, it became confusing trying to deduce which clusters were high risk from visualising the data, so chose below at random.
+risk_map = {
+    0: 'Low Risk',
+    1: 'Medium Risk',
+    2: 'High Risk',
+    3: 'Medium Risk',
+    4: 'Medium Risk'
+}
+df['risk_label'] = df['cluster'].map(risk_map)
+
+# Train RandomForest on cluster-derived labels ---
+x = df[[f + "_scaled" for f in features]]
+y = df['risk_label']
+clf = RandomForestClassifier(random_state=50)
+clf.fit(x, y)
+
+# New Applicant Info
+st.header("Enter Applicant Information:")
+
+dti = st.slider("Debt-to-Income Ratio", 0.0, 1.0, 0.25)
+annual_inc = st.number_input("Annual Income ($)", 5000, 200000, 45000, step=1000)
+revol_util = st.slider("Revolving Credit Utilization (%)", 0.0, 100.0, 35.0)
+delinq_2yrs = st.number_input("Delinquencies Last 2 Years", 0, 20, 1)
+loan_amnt = st.number_input("Loan Amount Requested ($)", 1000, 50000, 12000, step=500)
+
+new_applicant = pd.DataFrame([{
+    'dti': dti,
+    'annual_inc': annual_inc,
+    'revol_util': revol_util,
+    'delinq_2yrs': delinq_2yrs,
+    'loan_amnt': loan_amnt
+}])
+
+# Scale New User Input ---
+scaled_input = scaler.transform(new_applicant)
+scaled_input_df = pd.DataFrame(scaled_input, columns=[f + "_scaled" for f in features])
+
+#Predict risk 
+risk_pred = clf.predict(scaled_input_df)[0]
+
+st.subheader("PREDICTION RESULT")
+st.success(f"Predicted Credit Risk: **{risk_pred.upper()}**")
+
